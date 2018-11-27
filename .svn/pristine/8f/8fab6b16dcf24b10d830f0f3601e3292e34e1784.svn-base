@@ -1,0 +1,286 @@
+package de.mc04.battleshipbob;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
+
+import java.util.Iterator;
+
+/**
+ * @author mc04
+ */
+public class GameScreen implements Screen {
+
+    final BattleShipBob game;
+
+    private Texture enemyImage;
+    private Texture playerImage;
+    private Texture laserImage;
+    private Texture background1;
+    private Texture background2;
+    private Texture planetImage;
+
+    private BitmapFont YLFont;
+    private BitmapFont HSFont;
+
+    private long score;
+    private long highscore;
+    private boolean lost;
+
+    private OrthographicCamera camera;
+    private Player playerShip;
+    private Array<Enemy> enemies;
+    private Array<Rectangle> planets;
+    private Array<Laser> lasers;
+
+    private Vector3 touchPos;
+    private Vector3 aktuellePos;
+
+    private long lastEnemyTime;
+    private int PlanetZeit;
+    private int LaserZeit;
+    private int verschiebung;
+
+    private static Preferences ScorePrefs;
+
+
+
+
+    public GameScreen(final BattleShipBob gam){
+
+        this.game = gam;
+        ScorePrefs = Gdx.app.getPreferences("Highscore");
+
+        touchPos = new Vector3();
+        aktuellePos = new Vector3();
+        enemyImage = new Texture(Gdx.files.internal("enemy_spaceship_1.png"));
+        playerImage = new Texture(Gdx.files.internal("spaceship.png"));
+        laserImage = new Texture(Gdx.files.internal("laser.png"));
+        background1 = new Texture(Gdx.files.internal("background_test.png"));
+        background2 = new Texture(Gdx.files.internal("background_test.png"));
+        planetImage = new Texture(Gdx.files.internal("planet1.png"));
+
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 720, 1280);
+
+        playerShip = new Player(3, 1, 1);
+
+        enemies = new Array<Enemy>();
+        spawnEnemy();
+
+        planets = new Array<Rectangle>();
+        spawnPlanet();
+
+        lasers = new Array<Laser>();
+
+        score = 0;
+
+        if(!ScorePrefs.contains("Highscore")){
+            ScorePrefs.putLong("Highscore", 0);
+        }
+        highscore = ScorePrefs.getLong("Highscore");
+
+        HSFont = new BitmapFont();
+        HSFont.getData().setScale(2, 2);
+        YLFont = new BitmapFont(Gdx.files.internal("yl.fnt"), Gdx.files.internal("yl.png"), false);
+    }
+
+    private void spawnPlanet() {
+        Rectangle planet = new Rectangle();
+        planet.x = MathUtils.random(0, 720 - 128);
+        planet.y = 1280;
+        planet.width = 128;
+        planet.height = 128;
+        planets.add(planet);
+
+    }
+
+
+    private void spawnEnemy() {
+        Enemy enemy = new Enemy(1, 7, 300);
+        enemies.add(enemy);
+        lastEnemyTime = TimeUtils.nanoTime();
+    }
+
+    @Override
+    public void render(float delta){
+
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        camera.update();
+
+        game.batch.setProjectionMatrix(camera.combined);
+
+        game.batch.begin();
+        //disable blending for background only
+        game.batch.disableBlending();
+        // Verschiebung background
+        if (verschiebung == -1281) {
+            verschiebung = 0;
+        }
+        game.batch.draw(background1, 0, verschiebung);
+        game.batch.draw(background2, 0, 1280 + verschiebung);
+        verschiebung -= 3;
+        game.batch.enableBlending();
+
+        for (Rectangle planet : planets)
+            game.batch.draw(planetImage, planet.x, planet.y);
+
+        game.batch.draw(playerImage, playerShip.x - 14, playerShip.y - 14);
+
+        for (Laser laser : lasers)
+            game.batch.draw(laserImage, laser.x, laser.y);
+
+        for (Enemy enemy : enemies)
+            game.batch.draw(enemyImage, enemy.x, enemy.y);
+        HSFont.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+        HSFont.draw(game.batch, "Score: " + score, 0, 1200);
+        if (lost) {
+            YLFont.draw(game.batch, "You lose!", 80, 640);
+            YLFont.draw(game.batch, "Highscore: " + highscore, 80, 600);
+
+        }
+        game.batch.end();
+        // process user input
+        if (Gdx.input.isTouched()) {
+
+            aktuellePos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(touchPos);
+            playerShip.x = (touchPos.x - aktuellePos.x) / 2 ;
+            playerShip.y = ((touchPos.y - aktuellePos.y) / 2) + 90;
+        }
+
+        //TODO eigene methode
+        // make sure the playerShip stays within the screen bounds
+        if (playerShip.x < 0) playerShip.x = 0;
+        if (playerShip.x > 720 - 100) playerShip.x = 720 - 100;
+        if (playerShip.y < 0) playerShip.y = 0;
+        if (playerShip.y > 1280 - 100) playerShip.y = 1280 - 100;
+
+
+        if (TimeUtils.nanoTime() - lastEnemyTime > 100000000) spawnEnemy();
+        if (PlanetZeit > 600) {
+            spawnPlanet();
+            PlanetZeit = 0;
+        }
+        if (LaserZeit > 0 && Gdx.input.isTouched()) {
+            lasers = playerShip.spawnLaser();
+            LaserZeit = 0;
+        }
+
+        if (playerShip.getLife() == 0) {
+            lost = true;
+            ScorePrefs.putLong("Highscore", highscore);
+            ScorePrefs.flush();
+        }
+
+        // move the enemies, remove any that are beneath the bottom edge of
+        // the screen or that hit the playerShip.
+        //TODO hitdetection ändern, sobald mehrere laser geschossen werden können und gegener feuern
+        Iterator<Enemy> iter_enemy = enemies.iterator();
+        while (iter_enemy.hasNext()) {
+
+            Enemy enemy = iter_enemy.next();
+            enemy.y -= enemy.getSpeed() * Gdx.graphics.getDeltaTime();
+
+            if (enemy.y + 128 < 0) iter_enemy.remove();
+
+            if (playerShip.overlaps(enemy)) {
+
+                playerShip.hit(1); //kollision spieler gegner
+                iter_enemy.remove();
+                continue;
+            }
+
+
+            Iterator<Laser> iter_laser = lasers.iterator();
+
+            while (iter_laser.hasNext()) {
+
+                Rectangle laser = iter_laser.next();
+                if (enemy.treffer(laser)) {
+                    if (enemy.getLife() == 0) {
+                        if (!lost) {
+                            iter_enemy.remove();
+                            score++;
+
+                            if(score > highscore) highscore = score;
+                        }
+                    }
+                    iter_laser.remove();
+                    break;
+                }
+            }
+        }
+
+
+
+
+        Iterator<Laser> iter_laser = lasers.iterator();
+        while (iter_laser.hasNext()) {
+            Rectangle laser = iter_laser.next();
+            laser.y += 800 * Gdx.graphics.getDeltaTime();
+            if (laser.y + 29 > 1280) iter_laser.remove();
+        }
+
+        Iterator<Rectangle> iter_planet = planets.iterator();
+        while (iter_planet.hasNext()) {
+            Rectangle planet = iter_planet.next();
+            planet.y -= 200 * Gdx.graphics.getDeltaTime();
+            if (planet.y + 300 < 0) iter_planet.remove();
+        }
+
+        PlanetZeit++;
+        if (Gdx.input.isTouched()) LaserZeit++;
+
+    }
+
+    @Override
+    public void show() {
+
+    }
+
+    @Override
+    public void resize(int width, int height) {
+    }
+
+    @Override
+    public void hide() {
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void dispose() {
+        // dispose of all the native resources
+        enemyImage.dispose();
+        playerImage.dispose();
+        planetImage.dispose();
+        HSFont.dispose();
+        background1.dispose();
+        background2.dispose();
+        laserImage.dispose();
+    }
+
+}
+
+
+
+

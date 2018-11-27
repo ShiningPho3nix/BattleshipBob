@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "Z:\\Android\\android\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi-v4\\raumschiff_klein.png",
+        "source": "Z:\\Android\\android\\res\\drawable-xhdpi\\raumschiff_klein.png"
+    },
+    {
+        "merged": "Z:\\Android\\BattleShipBob\\android\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi-v4\\spaceship.png",
+        "source": "Z:\\Android\\BattleShipBob\\android\\res\\drawable-xhdpi\\spaceship.png"
+    },
+    {
+        "merged": "Z:\\Android\\BattleShipBob\\android\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi-v4\\raumschiff_klein.png",
+        "source": "Z:\\Android\\BattleShipBob\\android\\res\\drawable-xhdpi\\raumschiff_klein.png"
+    }
+]

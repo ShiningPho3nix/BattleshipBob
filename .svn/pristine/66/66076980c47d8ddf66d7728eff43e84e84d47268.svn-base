@@ -1,0 +1,121 @@
+package de.mc04.battleshipbob;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
+
+
+/**
+ * ...
+ */
+public class MainMenuScreen implements Screen{
+
+    final BattleShipBob game;
+    OrthographicCamera camera;
+    private Texture startbuttonIMG;
+    private Rectangle startbutton;
+    private Texture startbutton2IMG;
+    private Rectangle startbutton2;
+    private Vector3 touchPos;
+    private int a;
+
+    //TODO inzwischen überflüssigen code löschen
+
+    public MainMenuScreen(final BattleShipBob gam) {
+
+        game = gam;
+
+        a = 0;
+
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 720, 1280);
+
+        touchPos = new Vector3();
+
+        startbuttonIMG = new Texture(Gdx.files.internal("start_button.png"));
+        startbutton = new Rectangle();
+        startbutton.x = 110;
+        startbutton.y = 700;
+        startbutton.width = 500;
+        startbutton.height = 120;
+
+        startbutton2IMG = new Texture(Gdx.files.internal("start_button2.png"));
+        startbutton2 = new Rectangle();
+        startbutton2.x = 110;
+        startbutton2.y = 700;
+        startbutton2.width = 500;
+        startbutton2.height = 120;
+    }
+
+
+    @Override
+    public void render(float delta) {
+        Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
+
+        game.batch.begin();
+        game.batch.draw(startbuttonIMG, 100, 700);
+        game.batch.end();
+
+
+        if (Gdx.input.isTouched()) {
+
+            touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(touchPos);
+
+            if (touchPos.x > 110 && touchPos.x < 610 && touchPos.y > 700 && touchPos.y < 820) {
+                game.batch.begin();
+                game.batch.draw(startbutton2IMG, 100, 700);
+                game.batch.end();
+                a = 1;
+            }
+            else {
+                a = 0;
+            }
+        }
+
+
+        if (!Gdx.input.isTouched() && a == 1){
+            game.batch.begin();
+            game.batch.draw(startbuttonIMG, 110, 700);
+            game.batch.end();
+            game.setScreen(new GameScreen(game));
+            dispose();
+
+        }
+        }
+
+
+    @Override
+    public void resize(int width, int height) {
+    }
+
+    @Override
+    public void show() {
+    }
+
+    @Override
+    public void hide() {
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void dispose() {
+    }
+
+}

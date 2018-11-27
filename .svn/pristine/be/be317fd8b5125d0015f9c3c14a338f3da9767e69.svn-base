@@ -1,0 +1,38 @@
+package de.mc04.battleshipbob;
+
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+
+/**
+ * Created by 2weichen on 25.02.2016.
+ */
+public class Enemy extends Rectangle{
+    private int life;
+    private int speed;
+    private int typ;
+
+    public Enemy(int typ_input, int life_input, int speed_input) {
+        super(MathUtils.random(0, 720 - 128), 1280, 128, 128);
+        life = life_input;
+        speed = speed_input;
+        typ = typ_input;
+    }
+
+    public boolean treffer(Rectangle rectangle) {
+        if (this.overlaps(rectangle)) {
+            life -= 1;
+        }
+        return this.overlaps(rectangle);
+    }
+
+    public int getLife() {
+
+        return life;
+    }
+
+    public int getSpeed() {
+
+        return speed;
+    }
+
+}

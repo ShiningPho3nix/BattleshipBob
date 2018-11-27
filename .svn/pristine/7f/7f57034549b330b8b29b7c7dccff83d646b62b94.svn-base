@@ -1,0 +1,34 @@
+package de.mc04.battleshipbob;
+
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
+
+/**
+ * Created by Steffen on 27.02.2016.
+ */
+public class Button extends Rectangle{
+
+    private Texture tex;
+    private Vector3 buttonPos;
+    private Vector3 imgSize;
+    private String buttonName;
+    private Rectangle button;
+
+    public void Button(Texture image, Vector3 pos, Vector3 size, String name){
+
+        buttonName = name;
+        button = new Rectangle();
+        button.x = pos.x;
+        button.y = pos.y;
+        imgSize.x = size.x;
+        imgSize.y = size.y;
+        tex = image;
+    }
+
+    public Texture getTexture(){
+
+        return tex;
+    }
+
+}

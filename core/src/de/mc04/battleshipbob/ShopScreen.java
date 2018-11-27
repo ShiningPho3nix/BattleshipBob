@@ -1,0 +1,131 @@
+package de.mc04.battleshipbob;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
+
+/**
+ * REEEEEEEE
+ */
+public class ShopScreen implements Screen{
+
+    private BattleShipBob game;
+    OrthographicCamera camera;
+    private Vector3 touchPosV;
+    private Texture backbuttonIMG_pressed;
+    private Texture backbuttonIMG_not_pressed;
+    private Texture cannonbuttonIMG_pressed;
+    private Texture cannonbuttonIMG_not_pressed;
+    private Rectangle button_back;
+    private Rectangle button_upgrade_cannons;
+
+
+
+    public ShopScreen(BattleShipBob gam){
+        game = gam;
+
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 720, 1280);
+
+        touchPosV = new Vector3();
+        backbuttonIMG_pressed = new Texture("Bilder/Buttons/back_pressed.png");
+        backbuttonIMG_not_pressed = new Texture("Bilder/Buttons/back_not_pressed.png");
+        cannonbuttonIMG_pressed = new Texture("Bilder/Buttons/cannon_button_pressed.png");
+        cannonbuttonIMG_not_pressed = new Texture("Bilder/Buttons/cannon_button_not_pressed.png");
+        button_back = new Rectangle(10,1150,300,120);
+        button_upgrade_cannons = new Rectangle(20,20,500,120);
+    }
+
+    @Override
+    public void render(float delta) {
+
+        //back button konfigurieren
+        if(!Gdx.input.isKeyPressed(Input.Keys.BACK)) {
+            game.lastButtonPressed = 0;
+        }
+        else if (game.lastButtonPressed != 4 && Gdx.input.isKeyPressed(Input.Keys.BACK)) {
+            game.lastButtonPressed = 4;
+            game.setScreen(new GameStartScreen(game));
+        }
+
+        if (Gdx.input.isTouched()) {
+            touchPosV.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(touchPosV);
+            game.touchPos.x = touchPosV.x;
+            game.touchPos.y = touchPosV.y;
+        }
+
+        Gdx.gl.glClearColor(0f, 0f, 0f, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
+
+        //TODO Upgrades, icons, buttons etc.
+        game.batch.begin();
+
+        game.batch.disableBlending();
+        game.batch.draw(game.backgroundMenu, 0, 0);
+        game.batch.enableBlending();
+
+        //button back
+        if(Gdx.input.isTouched() && game.touchPos.overlaps(button_back)) {
+            game.batch.draw(backbuttonIMG_pressed, button_back.x, button_back.y);
+        }
+        else if (!Gdx.input.isTouched() && game.touchPos.overlaps(button_back)) {
+            game.setScreen(new GameStartScreen(game));
+        }
+        else game.batch.draw(backbuttonIMG_not_pressed, button_back.x, button_back.y);
+
+        //button upgrade cannons
+        if(Gdx.input.isTouched() && game.touchPos.overlaps(button_upgrade_cannons)) {
+            game.batch.draw(cannonbuttonIMG_pressed, button_upgrade_cannons.x, button_upgrade_cannons.y);
+        }
+        else if (!Gdx.input.isTouched() && game.touchPos.overlaps(button_upgrade_cannons)) {
+            if(game.geld >= 5000*game.player_cannons && game.player_cannons < 4){
+                game.geld -= 5000*game.player_cannons;
+                game.player_cannons++;
+                game.PREF_PLAYER_CANNONS.putInteger("player_cannons", game.player_cannons).flush();
+                game.touchPos.x = -1;
+                game.touchPos.x = -1;
+            }
+            game.batch.draw(cannonbuttonIMG_pressed, button_upgrade_cannons.x, button_upgrade_cannons.y);
+        }
+        else game.batch.draw(cannonbuttonIMG_not_pressed, button_upgrade_cannons.x, button_upgrade_cannons.y);
+
+        game.batch.end();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+    }
+
+    @Override
+    public void show() {
+    }
+
+    @Override
+    public void hide() {
+        dispose();
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void dispose() {
+        backbuttonIMG_not_pressed.dispose();
+        backbuttonIMG_pressed.dispose();
+
+    }
+}

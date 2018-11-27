@@ -1,0 +1,62 @@
+package de.mc04.battleshipbob;
+
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+
+/**
+ * Created by 3dworsky on 26.02.2016.
+ */
+public class Player extends Rectangle{
+    // TODO Vektor zur Bewegung zum Finger einbauen
+
+    private int life;
+    private int power;
+    private int cannons;
+    private Array<Laser> laserArray;
+
+
+    public Player(int start_life, int start_power, int start_cannons){
+        super(720 / 2 - 128 / 2, 20, 100, 100);
+
+        life = start_life;
+        power = start_power;
+        cannons = start_cannons;
+        laserArray = new Array<Laser>();
+    }
+
+    //TODO mehrere laser
+    public Array<Laser> spawnLaser(){
+
+        Laser laser = new Laser();
+        laser.x = this.x + 48;
+        laser.y = this.y + 90;
+        laser.width = 4;
+        laser.height = 29;
+        laserArray.add(laser);
+
+        return laserArray;
+    }
+
+    public void hit(int damage){
+     this.life -= damage;
+        if (life < 0) life = 0;
+    }
+
+
+    public int getLife() {
+
+        return life;
+    }
+
+    public int getPower(){
+
+        return power;
+    }
+
+    public int getCannons(){
+
+        return cannons;
+    }
+
+}

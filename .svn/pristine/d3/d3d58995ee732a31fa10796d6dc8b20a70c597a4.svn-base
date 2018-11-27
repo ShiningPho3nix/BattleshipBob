@@ -1,0 +1,14 @@
+package de.mc04.battleshipbob;
+
+import com.badlogic.gdx.math.Rectangle;
+
+/**
+ * Created by 3dworsky on 26.02.2016.
+ */
+public class Laser extends Rectangle{
+
+    //TODO alles
+    public Laser(){
+        super();
+    }
+}
